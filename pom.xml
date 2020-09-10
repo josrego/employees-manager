@@ -20,6 +20,7 @@
         <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
         <lombok.version>1.18.12</lombok.version>
         <log4j2.version>2.13.0</log4j2.version>
+        <jackson.version>2.11.2</jackson.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -47,10 +48,18 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!--jackson-->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
         <!-- logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

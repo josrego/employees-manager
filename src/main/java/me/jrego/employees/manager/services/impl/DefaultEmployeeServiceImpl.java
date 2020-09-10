@@ -1,7 +1,7 @@
 package me.jrego.employees.manager.services.impl;
 
 import me.jrego.employees.manager.models.Employee;
-import me.jrego.employees.manager.models.EmployeeSearchParameters;
+import me.jrego.employees.manager.models.requests.EmployeesSearchQuery;
 import me.jrego.employees.manager.services.EmployeesService;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -16,7 +16,7 @@ public class DefaultEmployeeServiceImpl implements EmployeesService {
     }
 
     @Override
-    public List<Employee> find(EmployeeSearchParameters search) {
+    public List<Employee> find(EmployeesSearchQuery search) {
         return null;
     }
 }
