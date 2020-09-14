@@ -1,5 +1,6 @@
 package me.jrego.employees.manager.controller;
 
+import io.smallrye.mutiny.Multi;
 import lombok.extern.log4j.Log4j2;
 import me.jrego.employees.manager.model.Employee;
 import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
@@ -8,12 +9,9 @@ import me.jrego.employees.manager.service.EmployeesService;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import java.time.LocalDate;
+import javax.ws.rs.QueryParam;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("/employees")
 @Log4j2
@@ -24,24 +22,12 @@ public class EmployeesController {
 
     @GET
     @Produces("application/json")
-    public List<Employee> find(@PathParam("firstName") String firstName,
-                               @PathParam("lastName") String lastName,
-                               @PathParam("contractExpirationDate") Date contractExpirationDate) {
-        EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName,
-                LocalDate.from(contractExpirationDate.toInstant()));
-
+    public Multi<Employee> find(@QueryParam("firstName") String firstName,
+                                @QueryParam("lastName") String lastName,
+                                @QueryParam("contractExpirationDate") Date contractExpirationDate) {
+        EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName, contractExpirationDate);
         log.info("find employees with params: {}", employeesSearchQuery.toString());
 
-        List<Employee> employees = service.find(employeesSearchQuery);
-        debugEmployeeList(employees);
-
-        return employees;
-    }
-
-    private void debugEmployeeList(List<Employee> employees) {
-        if (log.isDebugEnabled()) {
-            String joinedEmployeeString = employees.stream().map(Employee::toString).collect(Collectors.joining(","));
-            log.debug("Result for find employees: {}", joinedEmployeeString);
-        }
+        return service.find(employeesSearchQuery);
     }
 }

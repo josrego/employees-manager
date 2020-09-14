@@ -34,8 +34,8 @@ public class Employee extends BaseEmployee {
             return null;
         }
 
-        String firstName = row.getString("firstName");
-        String lastName = row.getString("lastName");
+        String firstName = row.getString("first_name");
+        String lastName = row.getString("last_name");
         Integer age = row.getInteger("age");
         Contract contract = Contract.from(row);
 
