@@ -1,14 +1,12 @@
-package me.jrego.employees.manager.models;
+package me.jrego.employees.manager.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 public abstract class BaseEmployee {
     private String firstName;
     private String lastName;

@@ -1,8 +1,9 @@
-package me.jrego.employees.manager.controllers;
+package me.jrego.employees.manager.controller;
 
+import io.smallrye.mutiny.Uni;
 import lombok.extern.log4j.Log4j2;
-import me.jrego.employees.manager.models.Employee;
-import me.jrego.employees.manager.services.EmployeesService;
+import me.jrego.employees.manager.model.Employee;
+import me.jrego.employees.manager.service.EmployeesService;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -20,8 +21,8 @@ public class EmployeeController {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public Employee create(Employee employee) {
+    public Uni<Employee> create(Employee employee) {
         log.debug("Creating employee : {}", employee);
-        return employee;
+        return service.create(employee);
     }
 }

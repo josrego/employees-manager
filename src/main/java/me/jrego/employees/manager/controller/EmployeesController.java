@@ -1,9 +1,9 @@
-package me.jrego.employees.manager.controllers;
+package me.jrego.employees.manager.controller;
 
 import lombok.extern.log4j.Log4j2;
-import me.jrego.employees.manager.models.Employee;
-import me.jrego.employees.manager.models.requests.EmployeesSearchQuery;
-import me.jrego.employees.manager.services.EmployeesService;
+import me.jrego.employees.manager.model.Employee;
+import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
+import me.jrego.employees.manager.service.EmployeesService;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -11,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +26,9 @@ public class EmployeesController {
     @Produces("application/json")
     public List<Employee> find(@PathParam("firstName") String firstName,
                                @PathParam("lastName") String lastName,
-                               @PathParam("contractExpirationDate") LocalDate contractExpirationDate) {
-        EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName, contractExpirationDate);
+                               @PathParam("contractExpirationDate") Date contractExpirationDate) {
+        EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName,
+                LocalDate.from(contractExpirationDate.toInstant()));
 
         log.info("find employees with params: {}", employeesSearchQuery.toString());
 

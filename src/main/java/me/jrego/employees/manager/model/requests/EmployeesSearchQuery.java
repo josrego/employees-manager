@@ -1,10 +1,10 @@
-package me.jrego.employees.manager.models.requests;
+package me.jrego.employees.manager.model.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.jrego.employees.manager.models.BaseEmployee;
+import me.jrego.employees.manager.model.BaseEmployee;
 
 import java.time.LocalDate;
 
