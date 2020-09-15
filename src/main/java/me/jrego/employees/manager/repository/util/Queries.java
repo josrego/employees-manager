@@ -11,7 +11,8 @@ public class Queries {
     public final String SELECT_ALL_EMPLOYEES_WITH_CONTRACT = SELECT_ALL_FROM + EmployeeTable.TABLE_NAME
             + " e INNER JOIN " + ContractTable.TABLE_NAME + " c "
             + "ON e.id = c.employee_id ";
-    public String WHERE = " WHERE ";
+    public final String ORDER_BY = " ORDER BY ";
+    public final String WHERE = " WHERE ";
 
     @UtilityClass
     public class EmployeesQueries {

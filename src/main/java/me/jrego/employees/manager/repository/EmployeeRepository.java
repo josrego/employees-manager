@@ -8,7 +8,7 @@ import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
 public interface EmployeeRepository {
     Uni<Employee> create(Employee employee);
 
-    Uni<Employee> get(Long employeeId);
+    Uni<Employee> find(Long employeeId);
 
-    Multi<Employee> find(EmployeesSearchQuery search);
+    Multi<Employee> findAll(EmployeesSearchQuery search);
 }

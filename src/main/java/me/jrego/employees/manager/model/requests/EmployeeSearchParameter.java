@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 
 @Getter
-public enum EmployeeSearchParameters {
+public enum EmployeeSearchParameter {
     FIRST_NAME(EmployeeTable.Columns.FIRST_NAME, null),
     LAST_NAME(EmployeeTable.Columns.LAST_NAME, null),
     CONTRACT_EXPIRATION_DATE(ContractTable.Columns.EXPIRATION_DATE, dateAsString
@@ -18,7 +18,7 @@ public enum EmployeeSearchParameters {
     private final String columnName;
     private final Function<String, ?> parse;
 
-    EmployeeSearchParameters(String columnName, Function<String, ?> parse) {
+    EmployeeSearchParameter(String columnName, Function<String, ?> parse) {
         this.columnName = columnName;
         this.parse = parse;
     }

@@ -13,6 +13,7 @@ import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
 import me.jrego.employees.manager.repository.EmployeeRepository;
 import me.jrego.employees.manager.repository.table.EmployeeTable;
 import me.jrego.employees.manager.repository.util.Queries;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -38,14 +39,14 @@ public class PostgresEmployeeRepository implements EmployeeRepository {
     }
 
     @Override
-    public Uni<Employee> get(Long employeeId) {
+    public Uni<Employee> find(Long employeeId) {
         return get(client, employeeId);
     }
 
     @Override
-    public Multi<Employee> find(EmployeesSearchQuery search) {
+    public Multi<Employee> findAll(EmployeesSearchQuery search) {
         String baseQuery = Queries.SELECT_ALL_EMPLOYEES_WITH_CONTRACT;
-        String fullQuery = applyConstraints(baseQuery, search);
+        String fullQuery = applyConstraints(baseQuery, search) + applyOrderBy(search);
 
         log.info("searching employees in db from query {}", fullQuery);
 
@@ -75,10 +76,19 @@ public class PostgresEmployeeRepository implements EmployeeRepository {
     }
 
     private String applyConstraints(String baseQuery, EmployeesSearchQuery search) {
-        if (search.isEmpty()) {
+        if (search.hasNoParameters()) {
             return baseQuery;
         }
 
         return baseQuery + Queries.WHERE + search.getConstrains();
+    }
+
+    private String applyOrderBy(EmployeesSearchQuery search) {
+        if (search.getSortParameter() == null) {
+            return StringUtils.EMPTY;
+        }
+
+        return Queries.ORDER_BY + search.getSortParameter().getOrderBy().getColumnName()
+                + StringUtils.SPACE + search.getSortParameter().getDirection().getQuery();
     }
 }

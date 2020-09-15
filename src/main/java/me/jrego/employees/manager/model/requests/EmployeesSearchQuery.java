@@ -16,14 +16,25 @@ import java.util.stream.Collectors;
 @ToString
 public class EmployeesSearchQuery {
 
-    Map<EmployeeSearchParameters, String> searchParameters;
+    Map<EmployeeSearchParameter, String> searchParameters;
+    EmployeeSearchSortParameter sortParameter;
 
-    public EmployeesSearchQuery(String firstName, String lastName, String expirationDate) {
+
+    public EmployeesSearchQuery(String firstName, String lastName) {
         searchParameters = new LinkedHashMap<>();
 
-        searchParameters.put(EmployeeSearchParameters.FIRST_NAME, firstName);
-        searchParameters.put(EmployeeSearchParameters.LAST_NAME, lastName);
-        searchParameters.put(EmployeeSearchParameters.CONTRACT_EXPIRATION_DATE, expirationDate);
+        searchParameters.put(EmployeeSearchParameter.FIRST_NAME, firstName);
+        searchParameters.put(EmployeeSearchParameter.LAST_NAME, lastName);
+    }
+
+    public EmployeesSearchQuery(String firstName, String lastName, String expirationDate) {
+        this(firstName, lastName);
+        searchParameters.put(EmployeeSearchParameter.CONTRACT_EXPIRATION_DATE, expirationDate);
+    }
+
+    public void setSortParameter(EmployeeSearchSortParameter.OrderBy orderBy,
+                                 EmployeeSearchSortParameter.Direction direction) {
+        this.sortParameter = new EmployeeSearchSortParameter(orderBy, direction);
     }
 
     public String getConstrains() {
@@ -36,12 +47,12 @@ public class EmployeesSearchQuery {
                 .collect(Collectors.joining(" AND "));
     }
 
-    public boolean isEmpty() {
+    public boolean hasNoParameters() {
         return searchParameters.values().stream().allMatch(StringUtils::isEmpty);
     }
 
     public Tuple getArgumentValues() {
-        if (isEmpty()) {
+        if (hasNoParameters()) {
             return Tuple.tuple();
         }
 
@@ -55,7 +66,7 @@ public class EmployeesSearchQuery {
         );
     }
 
-    private String getConstraint(EmployeeSearchParameters parameter, int index) {
+    private String getConstraint(EmployeeSearchParameter parameter, int index) {
         return parameter.getColumnName() + " = $" + index;
     }
 }

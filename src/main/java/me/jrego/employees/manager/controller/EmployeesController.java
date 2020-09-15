@@ -27,6 +27,17 @@ public class EmployeesController {
         EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName, contractExpirationDate);
         log.info("find employees with params: {}", employeesSearchQuery.toString());
 
-        return service.find(employeesSearchQuery);
+        return service.findAll(employeesSearchQuery);
+    }
+
+    @Path("/orderBy/contractExpirationDate")
+    @GET
+    @Produces("application/json")
+    public Multi<Employee> findOrderByExpirationDate(@QueryParam("firstName") String firstName,
+                                                     @QueryParam("lastName") String lastName) {
+        EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName);
+        log.info("find employees order by contract expiration date with params: {}", employeesSearchQuery.toString());
+
+        return service.findAllOrderByContractExpirationDate(employeesSearchQuery);
     }
 }

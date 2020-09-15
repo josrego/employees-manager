@@ -7,5 +7,10 @@ import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
 
 public interface EmployeesService {
     Uni<Employee> create(Employee employee);
-    Multi<Employee> find(EmployeesSearchQuery search);
+
+    Uni<Employee> find(Long employeeId);
+
+    Multi<Employee> findAll(EmployeesSearchQuery search);
+
+    Multi<Employee> findAllOrderByContractExpirationDate(EmployeesSearchQuery search);
 }

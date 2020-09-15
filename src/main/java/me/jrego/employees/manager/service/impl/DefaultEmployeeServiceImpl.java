@@ -4,6 +4,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import lombok.extern.log4j.Log4j2;
 import me.jrego.employees.manager.model.Employee;
+import me.jrego.employees.manager.model.requests.EmployeeSearchSortParameter;
 import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
 import me.jrego.employees.manager.repository.EmployeeRepository;
 import me.jrego.employees.manager.service.EmployeesService;
@@ -26,7 +27,22 @@ public class DefaultEmployeeServiceImpl implements EmployeesService {
     }
 
     @Override
-    public Multi<Employee> find(EmployeesSearchQuery search) {
-        return employeeRepository.find(search);
+    public Uni<Employee> find(Long employeeId) {
+        return employeeRepository.find(employeeId);
+    }
+
+    @Override
+    public Multi<Employee> findAll(EmployeesSearchQuery search) {
+        return employeeRepository.findAll(search);
+    }
+
+    @Override
+    public Multi<Employee> findAllOrderByContractExpirationDate(EmployeesSearchQuery search) {
+        search.setSortParameter(
+                EmployeeSearchSortParameter.OrderBy.CONTRACT_EXPIRATION_DATE,
+                EmployeeSearchSortParameter.Direction.ASC);
+
+        return employeeRepository.findAll(search)
+                .onItem().invoke(employee -> employee.getContract().calculateDaysUntilExpiration());
     }
 }

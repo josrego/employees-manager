@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.time.LocalDate;
+import me.jrego.employees.manager.repository.table.EmployeeTable;
 
 
 @Getter
@@ -17,12 +16,6 @@ public class Employee extends BaseEmployee {
     private int age;
     private Contract contract;
 
-    public Employee(String firstName, String lastName, int age, LocalDate contractExpirationDate) {
-        super(firstName, lastName);
-        this.age = age;
-        this.contract = new Contract(contractExpirationDate);
-    }
-
     public Employee(String firstName, String lastName, int age, Contract contract) {
         super(firstName, lastName);
         this.age = age;
@@ -30,13 +23,13 @@ public class Employee extends BaseEmployee {
     }
 
     public static Employee from(Row row) {
-        if(row == null) {
+        if (row == null) {
             return null;
         }
 
-        String firstName = row.getString("first_name");
-        String lastName = row.getString("last_name");
-        Integer age = row.getInteger("age");
+        String firstName = row.getString(EmployeeTable.Columns.FIRST_NAME);
+        String lastName = row.getString(EmployeeTable.Columns.LAST_NAME);
+        Integer age = row.getInteger(EmployeeTable.Columns.AGE);
         Contract contract = Contract.from(row);
 
         return new Employee(firstName, lastName, age, contract);
