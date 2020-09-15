@@ -7,13 +7,22 @@ import lombok.Setter;
 import lombok.ToString;
 import me.jrego.employees.manager.repository.table.EmployeeTable;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 public class Employee extends BaseEmployee {
+
+    @NotNull(message = "Age cannot be null")
+    @Positive(message = "Age has to be a positive integer")
     private int age;
+
+    @Valid
     private Contract contract;
 
     public Employee(String firstName, String lastName, int age, Contract contract) {

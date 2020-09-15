@@ -6,6 +6,8 @@ import me.jrego.employees.manager.model.Employee;
 import me.jrego.employees.manager.service.EmployeesService;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -21,7 +23,7 @@ public class EmployeeController {
     @POST
     @Consumes("application/json")
     @Produces("application/json")
-    public Uni<Employee> create(Employee employee) {
+    public Uni<Employee> create(@Valid @NotNull Employee employee) {
         log.debug("Creating employee : {}", employee);
         return service.create(employee);
     }

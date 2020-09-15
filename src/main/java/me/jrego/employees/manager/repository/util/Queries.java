@@ -16,6 +16,12 @@ public class Queries {
 
     @UtilityClass
     public class EmployeesQueries {
+        public String CREATE_TABLE = "CREATE TABLE employee (" +
+                "    id SERIAL primary KEY," +
+                "    first_name VARCHAR(200) NOT NULL," +
+                "    last_name VARCHAR(200) NOT NULL," +
+                "    age INTEGER NOT NULL)";
+
         public String INSERT = INSERT_INTO + EmployeeTable.TABLE_NAME
                 + " (" + EmployeeTable.Columns.getColumns() + ") "
                 + "VALUES ($1, $2, $3) RETURNING (" + EmployeeTable.Columns.ID + ")";
@@ -26,6 +32,10 @@ public class Queries {
 
     @UtilityClass
     public class ContractQueries {
+        public String CREATE_TABLE = "CREATE TABLE contract (" +
+                "    employee_id INTEGER PRIMARY KEY REFERENCES employee(id)," +
+                "    expiration_date DATE NOT NULL)";
+
         public String INSERT = INSERT_INTO + ContractTable.TABLE_NAME
                 + " (" + ContractTable.Columns.getColumns() + ") "
                 + "VALUES ($1, $2)";
