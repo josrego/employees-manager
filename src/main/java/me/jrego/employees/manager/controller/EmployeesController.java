@@ -11,6 +11,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Path("/employees")
@@ -24,7 +25,7 @@ public class EmployeesController {
     @Produces("application/json")
     public Multi<Employee> find(@QueryParam("firstName") String firstName,
                                 @QueryParam("lastName") String lastName,
-                                @QueryParam("contractExpirationDate") Date contractExpirationDate) {
+                                @QueryParam("contractExpirationDate") String contractExpirationDate) {
         EmployeesSearchQuery employeesSearchQuery = new EmployeesSearchQuery(firstName, lastName, contractExpirationDate);
         log.info("find employees with params: {}", employeesSearchQuery.toString());
 

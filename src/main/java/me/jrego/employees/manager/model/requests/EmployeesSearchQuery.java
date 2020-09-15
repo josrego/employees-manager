@@ -1,57 +1,46 @@
 package me.jrego.employees.manager.model.requests;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.vertx.mutiny.sqlclient.Tuple;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import me.jrego.employees.manager.model.BaseEmployee;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Getter
 @Setter
 @ToString
-public class EmployeesSearchQuery extends BaseEmployee {
+public class EmployeesSearchQuery {
 
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDate contractExpirationDate;
+    Map<EmployeeSearchParameters, String> searchParameters;
 
-    public EmployeesSearchQuery(String firstName, String lastName, Date expirationDate) {
-        super(firstName, lastName);
-        this.contractExpirationDate = expirationDate == null ?
-                null :
-                LocalDate.from(expirationDate.toInstant());
+    public EmployeesSearchQuery(String firstName, String lastName, String expirationDate) {
+        searchParameters = new LinkedHashMap<>();
+
+        searchParameters.put(EmployeeSearchParameters.FIRST_NAME, firstName);
+        searchParameters.put(EmployeeSearchParameters.LAST_NAME, lastName);
+        searchParameters.put(EmployeeSearchParameters.CONTRACT_EXPIRATION_DATE, expirationDate);
     }
 
-    public String getContractExpirationDateAsString() {
-        return contractExpirationDate == null ?
-                null :
-                contractExpirationDate.toString();
+    public String getConstrains() {
+        AtomicInteger i = new AtomicInteger(1);
+
+        return searchParameters.entrySet()
+                .stream()
+                .filter(entry -> StringUtils.isNotEmpty(entry.getValue()))
+                .map(entry -> getConstraint(entry.getKey(), i.getAndIncrement()))
+                .collect(Collectors.joining(" AND "));
     }
 
     public boolean isEmpty() {
-        return StringUtils.isEmpty(this.getFirstName())
-                && StringUtils.isEmpty(this.getLastName())
-                && contractExpirationDate == null;
-    }
-
-    public String getConstraints() {
-        if (isEmpty()) {
-            return null;
-        }
-
-        int constraintCount = 0;
-        Stream.of(
-                this.getFirstName(),
-                this.getLastName(),
-                this.getContractExpirationDateAsString()
-        ).filter(StringUtils::isNotEmpty)
-                .map(constraintQuery())
+        return searchParameters.values().stream().allMatch(StringUtils::isEmpty);
     }
 
     public Tuple getArgumentValues() {
@@ -60,13 +49,16 @@ public class EmployeesSearchQuery extends BaseEmployee {
         }
 
         return Tuple.tuple(
-                Stream.of(
-                        this.getFirstName(),
-                        this.getLastName(),
-                        this.getContractExpirationDateAsString()
-                )
-                        .filter(StringUtils::isNotEmpty)
+                this.searchParameters.entrySet()
+                        .stream()
+                        .filter(entry -> StringUtils.isNotEmpty(entry.getValue()))
+                        .map(entry -> entry.getKey().getParse() == null ? entry.getValue()
+                                : entry.getKey().getParse().apply(entry.getValue()))
                         .collect(Collectors.toList())
         );
+    }
+
+    private String getConstraint(EmployeeSearchParameters parameter, int index) {
+        return parameter.getColumnName() + " = $" + index;
     }
 }

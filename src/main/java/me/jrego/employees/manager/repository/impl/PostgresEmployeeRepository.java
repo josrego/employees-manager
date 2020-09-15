@@ -11,10 +11,8 @@ import me.jrego.employees.manager.model.Contract;
 import me.jrego.employees.manager.model.Employee;
 import me.jrego.employees.manager.model.requests.EmployeesSearchQuery;
 import me.jrego.employees.manager.repository.EmployeeRepository;
-import me.jrego.employees.manager.repository.table.ContractTable;
 import me.jrego.employees.manager.repository.table.EmployeeTable;
 import me.jrego.employees.manager.repository.util.Queries;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -81,20 +79,6 @@ public class PostgresEmployeeRepository implements EmployeeRepository {
             return baseQuery;
         }
 
-        StringBuilder query = new StringBuilder(baseQuery + Queries.WHERE);
-
-        if (StringUtils.isNotEmpty(search.getFirstName())) {
-            query.append(EmployeeTable.Columns.FIRST_NAME + " = $1");
-        }
-
-        if (StringUtils.isNotEmpty(search.getLastName())) {
-            query.append(EmployeeTable.Columns.LAST_NAME + " = $2");
-        }
-
-        if (search.getContractExpirationDate() != null) {
-            query.append(ContractTable.Columns.EXPIRATION_DATE + " = $3");
-        }
-
-        return query.toString();
+        return baseQuery + Queries.WHERE + search.getConstrains();
     }
 }
