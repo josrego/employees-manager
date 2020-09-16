@@ -9,11 +9,13 @@ import java.util.Map;
 
 public class PostgresDatabaseResource implements QuarkusTestResourceLifecycleManager {
 
+    public static final String SCHEMA_SQL_SCRIPT = "db/schema.sql";
     public static final PostgreSQLContainer DATABASE = new PostgreSQLContainer<>("postgres:10.5")
             .withDatabaseName("employees_api")
             .withUsername("employees")
             .withPassword("employees")
-            .withExposedPorts(5432);
+            .withExposedPorts(5432)
+            .withInitScript(SCHEMA_SQL_SCRIPT);
 
     @Override
     public Map<String, String> start() {

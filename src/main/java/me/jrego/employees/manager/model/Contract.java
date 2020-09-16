@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.vertx.mutiny.sqlclient.Row;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import me.jrego.employees.manager.util.DateUtils;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
@@ -36,8 +37,7 @@ public class Contract {
     }
 
     public void calculateDaysUntilExpiration() {
-        this.numberOfDaysLeft = Period.ofDays(
-                (int) ChronoUnit.DAYS.between(LocalDate.now(), expirationDate)).getDays();
+        this.numberOfDaysLeft = DateUtils.calculateDaysDifferenceFromNow(this.expirationDate);
     }
 
     public static Contract from(Row row) {

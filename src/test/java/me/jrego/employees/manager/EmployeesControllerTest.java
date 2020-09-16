@@ -4,11 +4,15 @@ import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import me.jrego.employees.manager.controller.EmployeesController;
 import me.jrego.employees.manager.model.Contract;
 import me.jrego.employees.manager.model.Employee;
 import me.jrego.employees.manager.resource.PostgresDatabaseResource;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -18,23 +22,36 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 
 @QuarkusTest
 @TestHTTPEndpoint(EmployeesController.class)
 @QuarkusTestResource(PostgresDatabaseResource.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EmployeesControllerTest {
 
     public static final String SAMPLE_FIST_NAME = "Jose";
     public static final String SAMPLE_LAST_NAME = "Rego";
     public static final int SAMPLE_AGE = 30;
 
+    public static Employee EMPLOYEE_1 =
+            new Employee("Lebron", "James", 35,
+                    new Contract(LocalDate.now().plus(60, ChronoUnit.DAYS)));
+    public static Employee EMPLOYEE_2 =
+            new Employee("Giannis", "Antetokounmpo", 25,
+                    new Contract(LocalDate.now().plus(40, ChronoUnit.DAYS)));
+    public static Employee EMPLOYEE_3 =
+            new Employee("Kevin", "Durant", 31,
+                    new Contract(LocalDate.now().plus(41, ChronoUnit.DAYS)));
+
     /**
      * CREATE EMPLOYEE
      */
     @Test
+    @Order(1)
     public void testCreateEmployeeSuccessful() {
-        testCreateEmployee(sampleEmployee());
+        testCreateEmployee(EMPLOYEE_1);
+        testCreateEmployee(EMPLOYEE_2);
+        testCreateEmployee(EMPLOYEE_3);
     }
 
     @Test
@@ -42,33 +59,25 @@ public class EmployeesControllerTest {
         Employee sampleEmployee = sampleEmployee();
         sampleEmployee.setFirstName(null);
 
-        given().when().contentType(ContentType.JSON)
-                .body(sampleEmployee)
-                .post().then()
+        createEmployee(sampleEmployee).then()
                 .statusCode(400);
 
         sampleEmployee.setFirstName(SAMPLE_FIST_NAME);
         sampleEmployee.setLastName(null);
 
-        given().when().contentType(ContentType.JSON)
-                .body(sampleEmployee)
-                .post().then()
+        createEmployee(sampleEmployee).then()
                 .statusCode(400);
 
         sampleEmployee.setLastName(SAMPLE_LAST_NAME);
         sampleEmployee.setAge(-1);
 
-        given().when().contentType(ContentType.JSON)
-                .body(sampleEmployee)
-                .post().then()
+        createEmployee(sampleEmployee).then()
                 .statusCode(400);
 
         sampleEmployee.setAge(SAMPLE_AGE);
         sampleEmployee.getContract().setExpirationDate(LocalDate.EPOCH);
 
-        given().when().contentType(ContentType.JSON)
-                .body(sampleEmployee)
-                .post().then()
+        createEmployee(sampleEmployee).then()
                 .statusCode(400);
     }
 
@@ -77,86 +86,58 @@ public class EmployeesControllerTest {
      */
     @Test
     public void testFindEmployeesNoFilter() {
-        Employee employee_1 =
-                new Employee("Lebron", "James", 35,
-                        new Contract(LocalDate.now().plus(30, ChronoUnit.DAYS)));
-        Employee employee_2 =
-                new Employee("Giannis", "Antetokounmpo", 25,
-                        new Contract(LocalDate.now().plus(40, ChronoUnit.DAYS)));
-        Employee employee_3 =
-                new Employee("Kevin", "Durant", 31,
-                        new Contract(LocalDate.now().plus(35, ChronoUnit.DAYS)));
-        testCreateEmployee(employee_1);
-        testCreateEmployee(employee_2);
-        testCreateEmployee(employee_3);
-
         given().when()
                 .get().then().statusCode(200).assertThat()
                 .body("firstName",
-                        hasItems(employee_1.getFirstName(),
-                                employee_2.getFirstName(),
-                                employee_3.getFirstName()))
+                        hasItems(EMPLOYEE_1.getFirstName(),
+                                EMPLOYEE_2.getFirstName(),
+                                EMPLOYEE_3.getFirstName()))
                 .body("lastName",
-                        hasItems(employee_1.getLastName(),
-                                employee_2.getLastName(),
-                                employee_3.getLastName()))
+                        hasItems(EMPLOYEE_1.getLastName(),
+                                EMPLOYEE_2.getLastName(),
+                                EMPLOYEE_3.getLastName()))
                 .body("age",
-                        hasItems(employee_1.getAge(),
-                                employee_2.getAge(),
-                                employee_3.getAge()))
+                        hasItems(EMPLOYEE_1.getAge(),
+                                EMPLOYEE_2.getAge(),
+                                EMPLOYEE_3.getAge()))
                 .body("contract.expirationDate",
-                        hasItems(employee_1.getContract().getFormattedExpirationDate(),
-                                employee_2.getContract().getFormattedExpirationDate(),
-                                employee_3.getContract().getFormattedExpirationDate())
+                        hasItems(EMPLOYEE_1.getContract().getFormattedExpirationDate(),
+                                EMPLOYEE_2.getContract().getFormattedExpirationDate(),
+                                EMPLOYEE_3.getContract().getFormattedExpirationDate())
                 );
     }
 
     @Test
     public void testFindEmployeesWithFirstNameFilter() {
-        Employee employee =
-                new Employee("James", "Harden", 31,
-                        new Contract(LocalDate.now().plus(40, ChronoUnit.DAYS)));
-        testCreateEmployee(employee);
-
         Map<Object, Object> responseFirstItem = given().when()
-                .queryParam("firstName", employee.getFirstName())
+                .queryParam("firstName", EMPLOYEE_1.getFirstName())
                 .get().then().statusCode(200).assertThat()
-                .body("$", hasSize(1))
+                .body("size()", is(1))
                 .extract().jsonPath().getMap("[0]");
 
-        assertFindItemList(employee, responseFirstItem);
+        assertFindItemList(EMPLOYEE_1, responseFirstItem);
     }
 
     @Test
     public void testFindEmployeesWithLastNameFilter() {
-        Employee employee =
-                new Employee("Stephen", " Curry", 32,
-                        new Contract(LocalDate.now().plus(40, ChronoUnit.DAYS)));
-        testCreateEmployee(employee);
-
         Map<Object, Object> responseFirstItem = given().when()
-                .queryParam("lastName", employee.getLastName())
+                .queryParam("lastName", EMPLOYEE_1.getLastName())
                 .get().then().statusCode(200).assertThat()
-                .body("$", hasSize(1))
+                .body("size()", is(1))
                 .extract().jsonPath().getMap("[0]");
 
-        assertFindItemList(employee, responseFirstItem);
+        assertFindItemList(EMPLOYEE_1, responseFirstItem);
     }
 
     @Test
     public void testFindEmployeesWithExpirationDateFilter() {
-        Employee employee =
-                new Employee("Russell", " Westbrook", 31,
-                        new Contract(LocalDate.now().plus(40, ChronoUnit.DAYS)));
-        testCreateEmployee(employee);
-
         Map<Object, Object> responseFirstItem = given().when()
-                .queryParam("contractExpirationDate", employee.getContract().getFormattedExpirationDate())
+                .queryParam("contractExpirationDate", EMPLOYEE_1.getContract().getFormattedExpirationDate())
                 .get().then().statusCode(200).assertThat()
-                .body("$", hasSize(1))
+                .body("size()", is(1))
                 .extract().jsonPath().getMap("[0]");
 
-        assertFindItemList(employee, responseFirstItem);
+        assertFindItemList(EMPLOYEE_1, responseFirstItem);
     }
 
     /**
@@ -164,52 +145,82 @@ public class EmployeesControllerTest {
      */
     @Test
     public void testFindEmployeesOrderByExpirationDate() {
-        Employee employee_1 =
-                new Employee("Kawhi", "Leonard", 29,
-                        new Contract(LocalDate.now().plus(5, ChronoUnit.DAYS)));
-        Employee employee_2 =
-                new Employee("Damian", " Lillard", 30,
-                        new Contract(LocalDate.now().plus(6, ChronoUnit.DAYS)));
-        Employee employee_3 =
-                new Employee("Kyle", "Lowry", 34,
-                        new Contract(LocalDate.now().plus(3, ChronoUnit.DAYS)));
-        testCreateEmployee(employee_1);
-        testCreateEmployee(employee_2);
-        testCreateEmployee(employee_3);
+        assertFindOrderByContractExpirationDateNoFilter();
+        assertFindOrderByContractExpirationDateFilterByFirstName();
+        assertFindOrderByContractExpirationDateFilterByLastName();
+    }
 
+    private void assertFindOrderByContractExpirationDateNoFilter() {
         given().when()
                 .get("/orderBy/contractExpirationDate")
                 .then().statusCode(200).assertThat()
                 .body("firstName",
-                        contains(employee_3.getFirstName(),
-                                employee_1.getFirstName(),
-                                employee_2.getFirstName()))
+                        contains(EMPLOYEE_2.getFirstName(),
+                                EMPLOYEE_3.getFirstName(),
+                                EMPLOYEE_1.getFirstName()))
                 .body("lastName",
-                        contains(employee_3.getLastName(),
-                                employee_1.getLastName(),
-                                employee_2.getLastName()))
+                        contains(EMPLOYEE_2.getLastName(),
+                                EMPLOYEE_3.getLastName(),
+                                EMPLOYEE_1.getLastName()))
                 .body("age",
-                        contains(employee_3.getAge(),
-                                employee_1.getAge(),
-                                employee_2.getAge()))
+                        contains(EMPLOYEE_2.getAge(),
+                                EMPLOYEE_3.getAge(),
+                                EMPLOYEE_1.getAge()))
                 .body("contract.expirationDate",
-                        contains(employee_3.getContract().getFormattedExpirationDate(),
-                                employee_1.getContract().getFormattedExpirationDate(),
-                                employee_2.getContract().getFormattedExpirationDate())
+                        contains(EMPLOYEE_2.getContract().getFormattedExpirationDate(),
+                                EMPLOYEE_3.getContract().getFormattedExpirationDate(),
+                                EMPLOYEE_1.getContract().getFormattedExpirationDate())
                 );
+    }
 
+    private void assertFindOrderByContractExpirationDateFilterByFirstName() {
+        given().when()
+                .queryParam("firstName", EMPLOYEE_1.getFirstName())
+                .get("/orderBy/contractExpirationDate")
+                .then().statusCode(200).assertThat()
+                .body("size()", is(1))
+                .body("firstName",
+                        hasItems(EMPLOYEE_1.getFirstName()))
+                .body("lastName",
+                        hasItems(EMPLOYEE_1.getLastName()))
+                .body("age",
+                        hasItems(EMPLOYEE_1.getAge()))
+                .body("contract.expirationDate",
+                        hasItems(EMPLOYEE_1.getContract().getFormattedExpirationDate())
+                );
+    }
+
+    private void assertFindOrderByContractExpirationDateFilterByLastName() {
+        given().when()
+                .queryParam("lastName", EMPLOYEE_1.getLastName())
+                .get("/orderBy/contractExpirationDate")
+                .then().statusCode(200).assertThat()
+                .body("size()", is(1))
+                .body("firstName",
+                        hasItems(EMPLOYEE_1.getFirstName()))
+                .body("lastName",
+                        hasItems(EMPLOYEE_1.getLastName()))
+                .body("age",
+                        hasItems(EMPLOYEE_1.getAge()))
+                .body("contract.expirationDate",
+                        hasItems(EMPLOYEE_1.getContract().getFormattedExpirationDate())
+                );
     }
 
     private void testCreateEmployee(Employee employee) {
-        given().when().contentType(ContentType.JSON)
-                .body(employee)
-                .post().then()
+        createEmployee(employee).then()
                 .statusCode(201).assertThat()
                 .body("firstName", is(employee.getFirstName()))
                 .body("lastName", is(employee.getLastName()))
                 .body("age", is(employee.getAge()))
                 .body("contract.expirationDate", is(
                         employee.getContract().getFormattedExpirationDate()));
+    }
+
+    private Response createEmployee(Employee employee) {
+        return given().when().contentType(ContentType.JSON)
+                .body(employee)
+                .post();
     }
 
     private void assertFindItemList(Employee employee, Map<Object, Object> responseFirstItem) {
