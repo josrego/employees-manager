@@ -12,6 +12,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 @Data
@@ -27,6 +28,11 @@ public class Contract {
 
     public Contract(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    @JsonIgnore
+    public String getFormattedExpirationDate() {
+        return expirationDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
     }
 
     public void calculateDaysUntilExpiration() {

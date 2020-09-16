@@ -1,4 +1,4 @@
-# getting-started project
+# Emplooyes Manager
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
