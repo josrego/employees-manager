@@ -11,13 +11,13 @@ import me.jrego.employees.manager.resource.PostgresDatabaseResource;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 
 @QuarkusTest
@@ -79,13 +79,13 @@ public class EmployeesControllerTest {
     public void testFindEmployeesNoFilter() {
         Employee employee_1 =
                 new Employee("Lebron", "James", 35,
-                        new Contract(LocalDate.now().plus(3, ChronoUnit.DAYS)));
+                        new Contract(LocalDate.now().plus(30, ChronoUnit.DAYS)));
         Employee employee_2 =
                 new Employee("Giannis", "Antetokounmpo", 25,
-                        new Contract(LocalDate.now().plus(4, ChronoUnit.DAYS)));
+                        new Contract(LocalDate.now().plus(40, ChronoUnit.DAYS)));
         Employee employee_3 =
                 new Employee("Kevin", "Durant", 31,
-                        new Contract(LocalDate.now().plus(3, ChronoUnit.DAYS)));
+                        new Contract(LocalDate.now().plus(35, ChronoUnit.DAYS)));
         testCreateEmployee(employee_1);
         testCreateEmployee(employee_2);
         testCreateEmployee(employee_3);
@@ -162,6 +162,43 @@ public class EmployeesControllerTest {
     /**
      * FIND EMPLOYEES ORDER BY CONTRACT EXPIRATION DATE
      */
+    @Test
+    public void testFindEmployeesOrderByExpirationDate() {
+        Employee employee_1 =
+                new Employee("Kawhi", "Leonard", 29,
+                        new Contract(LocalDate.now().plus(5, ChronoUnit.DAYS)));
+        Employee employee_2 =
+                new Employee("Damian", " Lillard", 30,
+                        new Contract(LocalDate.now().plus(6, ChronoUnit.DAYS)));
+        Employee employee_3 =
+                new Employee("Kyle", "Lowry", 34,
+                        new Contract(LocalDate.now().plus(3, ChronoUnit.DAYS)));
+        testCreateEmployee(employee_1);
+        testCreateEmployee(employee_2);
+        testCreateEmployee(employee_3);
+
+        given().when()
+                .get("/orderBy/contractExpirationDate")
+                .then().statusCode(200).assertThat()
+                .body("firstName",
+                        contains(employee_3.getFirstName(),
+                                employee_1.getFirstName(),
+                                employee_2.getFirstName()))
+                .body("lastName",
+                        contains(employee_3.getLastName(),
+                                employee_1.getLastName(),
+                                employee_2.getLastName()))
+                .body("age",
+                        contains(employee_3.getAge(),
+                                employee_1.getAge(),
+                                employee_2.getAge()))
+                .body("contract.expirationDate",
+                        contains(employee_3.getContract().getFormattedExpirationDate(),
+                                employee_1.getContract().getFormattedExpirationDate(),
+                                employee_2.getContract().getFormattedExpirationDate())
+                );
+
+    }
 
     private void testCreateEmployee(Employee employee) {
         given().when().contentType(ContentType.JSON)
@@ -184,6 +221,6 @@ public class EmployeesControllerTest {
 
     private Employee sampleEmployee() {
         return new Employee(SAMPLE_FIST_NAME, SAMPLE_LAST_NAME, SAMPLE_AGE,
-                new Contract(LocalDate.now().plus(5, ChronoUnit.DAYS)));
+                new Contract(LocalDate.now().plus(50, ChronoUnit.DAYS)));
     }
 }
