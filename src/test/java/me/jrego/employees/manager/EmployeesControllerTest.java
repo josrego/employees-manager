@@ -151,7 +151,7 @@ public class EmployeesControllerTest {
         testCreateEmployee(employee);
 
         Map<Object, Object> responseFirstItem = given().when()
-                .queryParam("contractExpirationDate", employee.getContract().getExpirationDate())
+                .queryParam("contractExpirationDate", employee.getContract().getFormattedExpirationDate())
                 .get().then().statusCode(200).assertThat()
                 .body("$", hasSize(1))
                 .extract().jsonPath().getMap("[0]");
